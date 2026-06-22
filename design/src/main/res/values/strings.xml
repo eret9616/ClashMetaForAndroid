@@ -251,6 +251,10 @@
     <string name="show_traffic">Show Traffic</string>
     <string name="show_traffic_summary">Auto refresh traffic in notification</string>
 
+    <string name="auto_update_on_unlock">Auto update on unlock</string>
+    <string name="auto_update_on_unlock_summary">Update all subscriptions when you unlock after the screen has been idle past the set threshold</string>
+    <string name="auto_update_on_unlock_interval">Idle threshold (minutes)</string>
+
     <string name="follow_system_android_10">Follow System (Android 10+)</string>
     <string name="always_dark">Always Dark</string>
     <string name="always_light">Always Light</string>

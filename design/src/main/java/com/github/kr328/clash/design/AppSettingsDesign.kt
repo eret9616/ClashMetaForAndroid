@@ -48,6 +48,19 @@ class AppSettingsDesign(
                 summary = R.string.allow_clash_auto_restart,
             )
 
+            switch(
+                value = srvStore::autoUpdateOnUnlock,
+                icon = R.drawable.ic_baseline_update,
+                title = R.string.auto_update_on_unlock,
+                summary = R.string.auto_update_on_unlock_summary,
+            )
+
+            editableText(
+                value = srvStore::autoUpdateOnUnlockInterval,
+                adapter = NullableTextAdapter.Minutes,
+                title = R.string.auto_update_on_unlock_interval,
+            )
+
             category(R.string.interface_)
 
             selectableList(

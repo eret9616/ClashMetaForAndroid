@@ -68,6 +68,9 @@
     <string name="settings">设置</string>
     <string name="show_traffic">显示流量</string>
     <string name="show_traffic_summary">在通知中自动刷新流量</string>
+    <string name="auto_update_on_unlock">解锁时自动更新</string>
+    <string name="auto_update_on_unlock_summary">息屏闲置超过设定时长后再次解锁时，自动更新全部订阅</string>
+    <string name="auto_update_on_unlock_interval">空闲阈值（分钟）</string>
     <string name="allow_clash_auto_restart">允许 Clash 自动重启</string>
     <string name="auto_restart">自动重启</string>
     <string name="stopped">已停止</string>

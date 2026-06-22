@@ -65,4 +65,14 @@ class ServiceStore(context: Context) {
         key = "dynamic_notification",
         defaultValue = true
     )
+
+    var autoUpdateOnUnlock by store.boolean(
+        key = "auto_update_on_unlock",
+        defaultValue = false
+    )
+
+    var autoUpdateOnUnlockInterval by store.int(
+        key = "auto_update_on_unlock_interval",
+        defaultValue = 15
+    )
 }
