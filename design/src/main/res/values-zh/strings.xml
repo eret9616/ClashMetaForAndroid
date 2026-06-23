@@ -68,6 +68,8 @@
     <string name="settings">设置</string>
     <string name="show_traffic">显示流量</string>
     <string name="show_traffic_summary">在通知中自动刷新流量</string>
+    <string name="auto_update_on_start">启动时自动更新</string>
+    <string name="auto_update_on_start_summary">每次开启 VPN 时自动更新一次全部订阅</string>
     <string name="auto_update_on_unlock">解锁时自动更新</string>
     <string name="auto_update_on_unlock_summary">息屏闲置超过设定时长后再次解锁时，自动更新全部订阅</string>
     <string name="auto_update_on_unlock_interval">空闲阈值（分钟）</string>

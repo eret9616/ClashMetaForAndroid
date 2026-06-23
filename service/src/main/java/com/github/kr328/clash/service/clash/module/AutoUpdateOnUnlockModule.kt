@@ -3,64 +3,70 @@ package com.github.kr328.clash.service.clash.module
 import android.app.Service
 import android.content.Intent
 import com.github.kr328.clash.common.log.Log
-import com.github.kr328.clash.service.ProfileReceiver
-import com.github.kr328.clash.service.data.ImportedDao
-import com.github.kr328.clash.service.model.Profile
 import com.github.kr328.clash.service.store.ServiceStore
 import java.util.concurrent.TimeUnit
 
 /**
  * Refresh all subscription profiles when the user unlocks the device, but only
- * when the screen has been idle for at least [IDLE_THRESHOLD] since the previous
- * unlock observed while Clash is running.
+ * when the screen has actually been off (idle) for at least the configured
+ * threshold since it was last turned off.
+ *
+ * The idle period is measured from [Intent.ACTION_SCREEN_OFF] to the following
+ * [Intent.ACTION_USER_PRESENT], so it reflects real sleep time rather than the
+ * gap between unlocks (which would also count active on-screen usage).
  *
  * Gated by [ServiceStore.autoUpdateOnUnlock]. Only active while a Clash service
- * is running (Android forbids registering ACTION_USER_PRESENT in the manifest).
+ * is running (Android 8+ forbids registering screen/unlock broadcasts in the
+ * manifest, so they are registered at runtime here).
  */
 class AutoUpdateOnUnlockModule(service: Service) : Module<Unit>(service) {
     private val store = ServiceStore(service)
 
-    // Timestamp (ms) of the previous unlock; 0 means "no baseline yet".
-    private var lastUnlockAt: Long = 0L
+    // Timestamp (ms) when the screen turned off and the current idle period
+    // began; 0 means no idle period is in progress (screen on, or already
+    // consumed by an unlock).
+    private var screenOffAt: Long = 0L
 
     override suspend fun run() {
-        val unlocks = receiveBroadcast(false) {
+        val events = receiveBroadcast(false) {
+            addAction(Intent.ACTION_SCREEN_OFF)
             addAction(Intent.ACTION_USER_PRESENT)
         }
 
         while (true) {
-            unlocks.receive()
+            when (events.receive().action) {
+                Intent.ACTION_SCREEN_OFF -> {
+                    // Remember the start of the idle period. Don't overwrite an
+                    // in-progress one, so a brief ambient wake / glance does not
+                    // reset the idle clock.
+                    if (screenOffAt == 0L)
+                        screenOffAt = System.currentTimeMillis()
+                }
+                Intent.ACTION_USER_PRESENT -> {
+                    val offAt = screenOffAt
+                    screenOffAt = 0L
 
-            if (!store.autoUpdateOnUnlock)
-                continue
+                    if (!store.autoUpdateOnUnlock)
+                        continue
 
-            val now = System.currentTimeMillis()
-            val last = lastUnlockAt
+                    // No recorded idle period (service started with screen on, or
+                    // already consumed): nothing to do.
+                    if (offAt == 0L)
+                        continue
 
-            lastUnlockAt = now
+                    val thresholdMs = TimeUnit.MINUTES.toMillis(
+                        store.autoUpdateOnUnlockInterval.coerceAtLeast(1).toLong()
+                    )
 
-            // First unlock since the service started: just record the baseline.
-            if (last == 0L)
-                continue
+                    val idle = System.currentTimeMillis() - offAt
+                    if (idle < thresholdMs)
+                        continue
 
-            val thresholdMs = TimeUnit.MINUTES.toMillis(
-                store.autoUpdateOnUnlockInterval.coerceAtLeast(1).toLong()
-            )
+                    Log.i("AutoUpdateOnUnlock: screen idle ${idle / 1000}s >= ${thresholdMs / 1000}s threshold, updating subscriptions")
 
-            val idle = now - last
-            if (idle < thresholdMs)
-                continue
-
-            Log.i("AutoUpdateOnUnlock: idle ${idle / 1000}s >= ${thresholdMs / 1000}s threshold, updating subscriptions")
-
-            updateAllSubscriptions()
+                    service.updateAllSubscriptions()
+                }
+            }
         }
-    }
-
-    private suspend fun updateAllSubscriptions() {
-        ImportedDao().queryAllUUIDs()
-            .mapNotNull { ImportedDao().queryByUUID(it) }
-            .filter { it.type != Profile.Type.File }
-            .forEach { ProfileReceiver.schedule(service, it) }
     }
 }

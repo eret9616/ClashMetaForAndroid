@@ -42,6 +42,7 @@ class TunService : VpnService(), CoroutineScope by CoroutineScope(Dispatchers.De
         install(AppListCacheModule(self))
         install(TimeZoneModule(self))
         install(SuspendModule(self))
+        install(AutoUpdateOnStartModule(self))
         install(AutoUpdateOnUnlockModule(self))
 
         try {

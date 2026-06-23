@@ -66,6 +66,11 @@ class ServiceStore(context: Context) {
         defaultValue = true
     )
 
+    var autoUpdateOnStart by store.boolean(
+        key = "auto_update_on_start",
+        defaultValue = false
+    )
+
     var autoUpdateOnUnlock by store.boolean(
         key = "auto_update_on_unlock",
         defaultValue = false

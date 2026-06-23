@@ -49,6 +49,13 @@ class AppSettingsDesign(
             )
 
             switch(
+                value = srvStore::autoUpdateOnStart,
+                icon = R.drawable.ic_baseline_update,
+                title = R.string.auto_update_on_start,
+                summary = R.string.auto_update_on_start_summary,
+            )
+
+            switch(
                 value = srvStore::autoUpdateOnUnlock,
                 icon = R.drawable.ic_baseline_update,
                 title = R.string.auto_update_on_unlock,
